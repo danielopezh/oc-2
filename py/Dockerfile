@@ -8,7 +8,7 @@ WORKDIR /app
 COPY app.py .
 
 # Instala Flask
-RUN pip install flask
+RUN pip install flask && ip install request
 
 RUN chown -R appuser:appgroup /app
 
