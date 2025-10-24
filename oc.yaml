@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mi-app-deployment
+  namespace: daniel-lopez-fisa-dev
+  labels:
+    app: mi-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mi-app
+  template:
+    metadata:
+      labels:
+        app: mi-app
+    spec:
+      containers:
+        - name: mi-app-container
+          #image: forcet22/hola-node:1.0.0  # ejemplo: nginx:1.25.3 o ghcr.io/usuario/app:latest
+          #image: danielopezh/os:1
+          #image: image-registry.openshift-image-registry.svc:5000/daniel-lopez-fisa-dev/ej-code-s2i:latest
+          image: danielopezh/os:build-{{ tag }}  # <-- Reemplaza con la imagen que quieras usar
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "800Mi"
+            limits:
+              cpu: "800m"
+              memory: "1500Mi"
+          envFrom:
+            - configMapRef:
+                name: mi-app-configmap
+          volumeMounts:
+            - name: datos
+              mountPath: "/app/data"
+      volumes:
+        - name: datos
+          persistentVolumeClaim:
+            claimName: dlh-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mi-app-service
+  namespace: daniel-lopez-fisa-dev
+  labels:
+    app: mi-app
+spec:
+  selector:
+    app: mi-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 4000        # Puerto expuesto del servicio
+      targetPort: 3000  # Puerto del contenedor
+  type: ClusterIP     # Cambia a LoadBalancer o NodePort si quieres acceso externo
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mi-app-configmap
+  namespace: daniel-lopez-fisa-dev
+data:
+  DATABASE_IP: "192.168.1.1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mi-app-secret
+  namespace: daniel-lopez-fisa-dev
+type: Opaque
+data:
+  PASSWORD: "aG9sYQ=="
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: dlh-hpa
+  namespace: daniel-lopez-fisa-dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mi-app-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 100
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dlh-pvc
+  namespace: daniel-lopez-fisa-dev
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: gp3
