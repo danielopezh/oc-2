@@ -9,7 +9,7 @@ def hello_world():
 
 # Llamada al segundo microservicio (interno en OpenShift)
     try:
-        r = requests.get("http://mi-app2-service:4000/")
+        r = requests.get("http://mi-app-service-2:4000/")
         return f"Respuesta del 1er micro-servicio: {r.text}", 200
     except Exception as e:
         return f"Error al llamar al otro servicio: {str(e)}", 500
