@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mi-app-deployment
+  name: mi-app-deployment-2
   namespace: daniel-lopez-fisa-dev
   labels:
-    app: mi-app
+    app: mi-app-2
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: mi-app
+      app: mi-app-2
   template:
     metadata:
       labels:
-        app: mi-app
+        app: mi-app-2
     spec:
       containers:
-        - name: mi-app-container
+        - name: mi-app-container-2
           #image: forcet22/hola-node:1.0.0  # ejemplo: nginx:1.25.3 o ghcr.io/usuario/app:latest
           #image: danielopezh/os:1
           #image: image-registry.openshift-image-registry.svc:5000/daniel-lopez-fisa-dev/ej-code-s2i:latest
-          image: danielopezh/os:build-{{ tag }}  # <-- Reemplaza con la imagen que quieras usar
+          image: danielopezh/os-2:build-{{ tag }}  # <-- Reemplaza con la imagen que quieras usar
           ports:
             - containerPort: 3000
           resources:
@@ -32,25 +32,25 @@ spec:
               memory: "1500Mi"
           envFrom:
             - configMapRef:
-                name: mi-app-configmap
+                name: mi-app-configmap-2
           volumeMounts:
             - name: datos
               mountPath: "/app/data"
       volumes:
         - name: datos
           persistentVolumeClaim:
-            claimName: dlh-pvc
+            claimName: dlh-pvc-2
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mi-app-service
+  name: mi-app-service-2
   namespace: daniel-lopez-fisa-dev
   labels:
-    app: mi-app
+    app: mi-app-2
 spec:
   selector:
-    app: mi-app
+    app: mi-app-2
   ports:
     - name: http
       protocol: TCP
@@ -61,7 +61,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mi-app-configmap
+  name: mi-app-configmap-2
   namespace: daniel-lopez-fisa-dev
 data:
   DATABASE_IP: "192.168.1.1"
@@ -69,7 +69,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mi-app-secret
+  name: mi-app-secret-2
   namespace: daniel-lopez-fisa-dev
 type: Opaque
 data:
@@ -78,13 +78,13 @@ data:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: dlh-hpa
+  name: dlh-hpa-2
   namespace: daniel-lopez-fisa-dev
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: mi-app-deployment
+    name: mi-app-deployment-2
   minReplicas: 1
   maxReplicas: 5
   metrics:
@@ -98,7 +98,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: dlh-pvc
+  name: dlh-pvc-2
   namespace: daniel-lopez-fisa-dev
 spec:
   accessModes:
