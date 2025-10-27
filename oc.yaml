@@ -122,7 +122,7 @@ metadata:
   namespace: daniel-lopez-fisa-dev
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
