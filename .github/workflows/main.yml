@@ -1,10 +1,9 @@
-name: CI-OC-2
+name: CI-DockerBuild
 
 on: 
   push:
     branches: ["main"]
   workflow_dispatch:
-
 jobs:
   build:
     # El tipo de máquina virtual donde se ejecutará el job
@@ -21,6 +20,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME  }}
           password: ${{ secrets.DOCKER_TOKEN  }}
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -29,24 +29,19 @@ jobs:
           tags: |
             type=raw,value=build-${{ github.run_number }}
 
-      # 2. Construye la imagen de Docker
-      #    Utiliza el Dockerfile que se encuentra en la raíz de tu proyecto.
-      #    Esto no subirá la imagen a ningún registro (registry).
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./py
-          file: ./py/Dockerfile
+          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  
   deploy:
-
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -55,21 +50,22 @@ jobs:
           curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar xz
           sudo mv oc /usr/local/bin/
           oc version
-
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
       - name: Log in Openshift
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: https://api.rm1.0a51.p1.openshiftapps.com:6443
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-      
       - name: Update Deployment tag
         run: |
           echo "Reemplazando {{ tag }} con ${{ github.run_number }}"
           sed -i "s|{{ tag }}|${{ github.run_number }}|g" oc.yaml
-          cat oc.yaml
+          cat values.yaml
 
       - name: Deploy files
         run: |
-          oc project daniel-lopez-fisa-dev
-          oc apply -f oc.yaml
-          oc rollout status deployment/mi-app-deployment
+          helm show chart oci://registry-1.docker.io/danielopezh/dlh-chart --version 7
+          helm upgrade --install microservicio-1 oci://registry-1.docker.io/danielopezh/dlh-chart --version 7 --values values.yaml
