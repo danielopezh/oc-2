@@ -5,7 +5,7 @@ FROM danielopezh/base:1
 WORKDIR /app
 
 # Copia el script al contenedor
-COPY app.py .
+COPY py/app.py .
 
 # Instala Flask
 RUN pip install flask
