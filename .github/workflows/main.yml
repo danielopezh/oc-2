@@ -70,5 +70,5 @@ jobs:
 
       - name: Deploy files
         run: |
-          helm show chart oci://registry-1.docker.io/danielopezh/dlh-chart --version 7
+          helm show chart oci://registry-1.docker.io/danielopezh/dlh-chart --version 4
           helm upgrade --install microservicio-1 oci://registry-1.docker.io/danielopezh/dlh-chart --version 4 --values values.yaml
