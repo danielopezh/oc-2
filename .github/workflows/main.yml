@@ -62,6 +62,7 @@ jobs:
         with:
           openshift_server_url: https://api.rm1.0a51.p1.openshiftapps.com:6443
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      
       - name: Update Deployment tag
         run: |
           echo "Reemplazando {{ tag }} con ${{ github.run_number }}"
@@ -71,4 +72,4 @@ jobs:
       - name: Deploy files
         run: |
           helm show chart oci://registry-1.docker.io/danielopezh/dlh-chart --version 4
-          helm upgrade --install microservicio-1 oci://registry-1.docker.io/danielopezh/dlh-chart --version 4 --values values.yaml
+          helm upgrade --install microservicio-2 oci://registry-1.docker.io/danielopezh/dlh-chart --version 4 --values values.yaml
