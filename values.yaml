@@ -5,12 +5,12 @@ metadata:
     app: mi-app-2
 
 # Kubernetes namespace to install into (can be overridden)
-namespace: daniel-lopez-fisa-dev
+namespace: daniel-lopez-fisag-dev
 
 replicaCount: 1
 
 container:
-  image: "daniel-lopez-fisa-dev/oc-2"
+  image: "daniel-lopez-fisag-dev/oc-2"
   tag: "{{ tag }}"
   port: 3000
   resources:
